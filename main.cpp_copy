@@ -1,0 +1,138 @@
+#include "SFML/Graphics/Color.hpp"
+#include "SFML/Graphics/RectangleShape.hpp"
+#include "SFML/System/Clock.hpp"
+#include "SFML/System/Vector2.hpp"
+#include "SFML/Window/Keyboard.hpp"
+#include <SFML/Graphics.hpp>
+#include <cstdint>
+#include <iostream>
+#include <ostream>
+#include <vector>
+
+enum class PlayerState
+{
+    Idle,
+    Falling,
+    Jumping
+};
+
+void createGrassBlock(std::vector<sf::RectangleShape> &grassBlocks, const sf::Vector2f &size,
+                      const sf::Vector2f &position)
+{
+    sf::RectangleShape grass;
+    grass.setSize(size);
+    grass.setPosition(position);
+    grass.setFillColor(sf::Color::Green);
+}
+
+std::string enumToString(PlayerState &state)
+{
+    switch (state)
+    {
+    case PlayerState::Idle:
+        return "Idle";
+    case PlayerState::Falling:
+        return "Falling";
+    case PlayerState::Jumping:
+        return "Jumping";
+    }
+}
+
+int main()
+{
+    std::vector<sf::RectangleShape> grassBlocks;
+
+    // createGrassBlock(grassBlocks, {64.0f, 64.0f}, {100.0f, 100.0f});
+
+    sf::RectangleShape player;
+    player.setSize(sf::Vector2f{64.0f, 128.0f});
+    player.setFillColor(sf::Color::Red);
+    player.setPosition(sf::Vector2f{100.0f, 100.0f});
+
+    sf::RenderWindow window(sf::VideoMode({1920, 1080}), "SFML works!");
+
+    sf::Clock deltaClock;
+    float deltaTime = 0.0f;
+    float playerSpeed = 2000.0f;
+    float playerGravity = 500.0f;
+    const std::uint32_t DEFAULT_PLAYER_JUMP_STEPS = 2000;
+    std::uint32_t playerJumpSteps;
+
+    PlayerState playerState = PlayerState::Idle;
+
+    while (window.isOpen())
+    {
+        while (const std::optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>())
+                window.close();
+        }
+        // Player movement
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+        {
+            player.move(sf::Vector2f{-playerSpeed * deltaTime, 0.0f});
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+        {
+            player.move(sf::Vector2f{playerSpeed * deltaTime, 0.0f});
+        }
+
+        switch (playerState)
+        {
+
+        case PlayerState::Idle:
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+            {
+                playerState = PlayerState::Jumping;
+                playerJumpSteps = DEFAULT_PLAYER_JUMP_STEPS;
+            }
+
+            bool foundAtLeastOneCollision = false;
+            for (auto &el : grassBlocks)
+            {
+                if (player.getGlobalBounds().findIntersection(el.getGlobalBounds()))
+                {
+                    foundAtLeastOneCollision = true;
+                }
+            }
+            if (!foundAtLeastOneCollision)
+            {
+                playerState = PlayerState::Falling;
+            }
+            break;
+        case PlayerState::Falling:
+            for (auto &el : grassBlocks)
+            {
+                if (player.getGlobalBounds().findIntersection(el.getGlobalBounds()))
+                {
+                    playerState = PlayerState::Idle;
+                }
+            }
+            player.move(sf::Vector2f{0.0f, playerGravity * deltaTime});
+            break;
+        case PlayerState::Jumping:
+            if (playerJumpSteps > 0)
+            {
+                player.move(sf::Vector2f{0.0f, -playerGravity * deltaTime});
+                playerJumpSteps--;
+            }
+            else
+            {
+                playerState = PlayerState::Falling;
+            }
+            break;
+        }
+
+        window.clear();
+
+        for (auto &el : grassBlocks)
+        {
+            window.draw(el);
+        }
+        std::cout << enumToString(playerState) << std::endl;
+        window.draw(player);
+        window.display();
+
+        deltaTime = deltaClock.restart().asSeconds();
+    }
+}

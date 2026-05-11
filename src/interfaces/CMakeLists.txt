@@ -1,0 +1,8 @@
+add_subdirectory(keyboard)
+add_subdirectory(delta-time)
+add_subdirectory(mouse)
+add_subdirectory(health-displayer)
+add_subdirectory(model-manager)
+add_subdirectory(model-renderer)
+add_subdirectory(world-gen)
+add_subdirectory(model)

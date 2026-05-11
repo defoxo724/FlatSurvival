@@ -1,0 +1,5 @@
+add_subdirectory(sfml-keyboard)
+add_subdirectory(sfml-delta-time)
+add_subdirectory(sfml-mouse)
+add_subdirectory(sfml-health-displayer)
+add_subdirectory(sfml-model-renderer)
