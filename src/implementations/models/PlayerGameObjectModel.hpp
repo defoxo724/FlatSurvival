@@ -12,6 +12,7 @@ enum class PlayerState
     FALLING,
     JUMPING
 };
+
 class PlayerGameObjectModel : public AGameObject
 {
   private:
@@ -19,10 +20,14 @@ class PlayerGameObjectModel : public AGameObject
     const std::string GAME_OBJECT_NAME = "PLAYER";
 
     PlayerState state = PlayerState::FALLING;
-    const float GRAVITY = 300.f;
+
+    const float GRAVITY = 1500.f;
     const float SPEED = 500.0f;
-    std::int32_t jumpSteps;
-    const std::int32_t MAX_JUMP_STEPS = 150;
+    const float JUMP_FORCE = -700.0f;
+
+    const int MAX_STEP_HEIGHT = 16;
+
+    float velocityY = 0.0f;
 
   public:
     PlayerGameObjectModel();
@@ -33,4 +38,6 @@ class PlayerGameObjectModel : public AGameObject
 
     void processState();
     void processMovement();
+
+    bool isOnGround();
 };

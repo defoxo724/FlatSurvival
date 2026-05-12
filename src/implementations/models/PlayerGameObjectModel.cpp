@@ -27,59 +27,155 @@ void PlayerGameObjectModel::update()
     processMovement();
 }
 
+bool PlayerGameObjectModel::isOnGround()
+{
+    Vec2 testPosition = {getPosition().x, getPosition().y + 1.0f};
+
+    for (auto &el : ModelManagerSingleton::getInstance()->getObject()->getGameObjects())
+    {
+        if (el.get() == this)
+        {
+            continue;
+        }
+
+        if (AABBHelper::isColliding(el->getPosition(), el->getHitbox(), testPosition, getHitbox()))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void PlayerGameObjectModel::processState()
 {
+    float deltaTime = DeltaTimeSingleton::getInstance()->getObject()->getDeltaTime();
 
-    // TO DZIAŁA
-    if (state == PlayerState::FALLING)
+    if (isOnGround())
     {
-        setPosition({getPosition().x,
-                     (getPosition().y) + GRAVITY * DeltaTimeSingleton::getInstance()->getObject()->getDeltaTime()});
-        // Iterowanie po każdym modelu. Jeśli koliduje z czymkolwiek to zmienia stan na IDLE
-        for (auto &el : ModelManagerSingleton::getInstance()->getObject()->getGameObjects())
+        if (velocityY > 0)
         {
-            if (el.get() == this)
-            {
-                continue;
-            }
-            if (AABBHelper::isColliding(el->getPosition(), el->getHitbox(), getPosition(), getHitbox()))
-            {
-                state = PlayerState::IDLE;
-            }
+            velocityY = 0;
         }
-    }
 
-    if (state == PlayerState::IDLE)
-    {
         if (KeyboardDetectorSingleton::getInstance()->getObject()->isKeyPressed(Key::SPACE))
         {
+            velocityY = JUMP_FORCE;
             state = PlayerState::JUMPING;
-            jumpSteps = MAX_JUMP_STEPS;
+        }
+        else
+        {
+            state = PlayerState::IDLE;
+        }
+    }
+    else
+    {
+        velocityY += GRAVITY * deltaTime;
+
+        if (velocityY < 0)
+        {
+            state = PlayerState::JUMPING;
+        }
+        else
+        {
+            state = PlayerState::FALLING;
         }
     }
 
-    if (state == PlayerState::JUMPING)
+    Vec2 oldPosition = getPosition();
+
+    setPosition({getPosition().x, getPosition().y + velocityY * deltaTime});
+
+    for (auto &el : ModelManagerSingleton::getInstance()->getObject()->getGameObjects())
     {
-        setPosition({getPosition().x,
-                     (getPosition().y) - GRAVITY * DeltaTimeSingleton::getInstance()->getObject()->getDeltaTime()});
-        jumpSteps--;
-        if (jumpSteps <= 0)
+        if (el.get() == this)
         {
-            state = PlayerState::FALLING;
+            continue;
+        }
+
+        if (AABBHelper::isColliding(el->getPosition(), el->getHitbox(), getPosition(), getHitbox()))
+        {
+            setPosition(oldPosition);
+
+            if (velocityY > 0)
+            {
+                velocityY = 0;
+                state = PlayerState::IDLE;
+            }
         }
     }
 }
 
 void PlayerGameObjectModel::processMovement()
 {
+    float deltaTime = DeltaTimeSingleton::getInstance()->getObject()->getDeltaTime();
+
+    float moveX = 0.0f;
+
     if (KeyboardDetectorSingleton::getInstance()->getObject()->isKeyPressed(Key::A))
     {
-        setPosition({getPosition().x - (SPEED * DeltaTimeSingleton::getInstance()->getObject()->getDeltaTime()),
-                     getPosition().y});
+        moveX -= SPEED * deltaTime;
     }
+
     if (KeyboardDetectorSingleton::getInstance()->getObject()->isKeyPressed(Key::D))
     {
-        setPosition({getPosition().x + (SPEED * DeltaTimeSingleton::getInstance()->getObject()->getDeltaTime()),
-                     getPosition().y});
+        moveX += SPEED * deltaTime;
+    }
+
+    Vec2 oldPosition = getPosition();
+
+    setPosition({getPosition().x + moveX, getPosition().y});
+
+    bool collision = false;
+
+    for (auto &el : ModelManagerSingleton::getInstance()->getObject()->getGameObjects())
+    {
+        if (el.get() == this)
+        {
+            continue;
+        }
+
+        if (AABBHelper::isColliding(el->getPosition(), el->getHitbox(), getPosition(), getHitbox()))
+        {
+            collision = true;
+            break;
+        }
+    }
+
+    if (collision)
+    {
+        bool stepped = false;
+
+        for (int i = 1; i <= MAX_STEP_HEIGHT; i++)
+        {
+            setPosition({oldPosition.x + moveX, oldPosition.y - static_cast<float>(i)});
+
+            bool stillColliding = false;
+
+            for (auto &el : ModelManagerSingleton::getInstance()->getObject()->getGameObjects())
+            {
+                if (el.get() == this)
+                {
+                    continue;
+                }
+
+                if (AABBHelper::isColliding(el->getPosition(), el->getHitbox(), getPosition(), getHitbox()))
+                {
+                    stillColliding = true;
+                    break;
+                }
+            }
+
+            if (!stillColliding)
+            {
+                stepped = true;
+                break;
+            }
+        }
+
+        if (!stepped)
+        {
+            setPosition(oldPosition);
+        }
     }
 }
