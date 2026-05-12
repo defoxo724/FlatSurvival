@@ -1,6 +1,12 @@
 TODO:
-    - Add dirt, stone, sand
     - Create water system
     - Create 2 biomes: 
         - 1. Desert - only sand and below sand stone, no water
         - 2. Plains - grass, below grass dirt, below dirt stone. Lakes with sandy beaches 
+
+
+
+
+ - Create layers, like BlockLayer, BulletLayer, BackgroundLayer.
+ - FIgure out about what i was thinking when i was creating GAME_OBJECT_NAME const. Is it a type name or name of individual object?
+ - Think about where should i put BasicBlock and AGameObject classes, shouldn't they be in interface directory? 
