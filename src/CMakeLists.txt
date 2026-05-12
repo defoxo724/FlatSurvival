@@ -18,5 +18,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     sfml-health-displayer
     model
     models
+    filesystem-impl
 )
 

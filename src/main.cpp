@@ -1,6 +1,8 @@
 #include "DeltaTimeSingleton.hpp"
+#include "ExecutablePathSingleton.hpp"
 #include "IHealthDisplayer.hpp"
 #include "KeyboardDetectorSingleton.hpp"
+#include "LinuxExecutablePath.hpp"
 #include "ModelManagerImpl.hpp"
 #include "ModelManagerSingleton.hpp"
 #include "ModelRendererSingleton.hpp"
@@ -18,16 +20,14 @@
 #include "Vec2.hpp"
 #include <SFML/Graphics.hpp>
 #include <cstddef>
+#include <cstdio>
 #include <ctime>
 #include <filesystem>
+#include <iostream>
 #include <memory>
 
 int main()
 {
-
-    sf::Font font{"./assets/fonts/PixelifySans-Bold.ttf"};
-    sf::Text text{font};
-    text.setString("XDDD");
 
     srand(time(NULL));
     sf::RenderWindow window(sf::VideoMode({1920, 1080}), "SFML works!");
@@ -37,12 +37,18 @@ int main()
     ModelRendererSingleton::getInstance()->setObject(std::make_shared<SfmlColorModelRenderer>(window));
     MouseDetectorSingleton::getInstance()->setObject(std::make_shared<SfmlMouseDetector>(window));
     DeltaTimeSingleton::getInstance()->setObject(std::make_shared<SfmlDeltaTime>());
+    ExecutablePathSingleton::getInstance()->setObject(std::make_shared<LinuxExecutablePath>());
 
     ModelManagerSingleton::getInstance()->setObject(std::make_shared<ModelManagerImpl>());
     auto go = std::make_shared<PlayerGameObjectModel>();
     ModelManagerSingleton::getInstance()->getObject()->addModel(go);
 
     go->setPosition({300, 300});
+
+    sf::Font font{ExecutablePathSingleton::getInstance()->getObject()->get() +
+                  "/../../assets/fonts/PixelifySans-Bold.ttf"};
+    sf::Text text{font};
+    text.setString("XDDD");
 
     std::shared_ptr<IHealthDisplayer> healthDisplayer = std::make_shared<SfmlHealthDisplayer>(font, window);
     // std::shared_ptr<IWorldGenerator> worldGen = std::make_shared<FlatWorldGenerator>(100, 30, Vec2{100, 500});
