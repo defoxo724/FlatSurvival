@@ -36,5 +36,15 @@ sf::Color SfmlColorModelRenderer::getModelColorByTextureName(const std::string &
         return sf::Color::Green;
     }
 
+    if (textureName == "STONE")
+    {
+        return sf::Color(100, 100, 100, 255);
+    }
+
+    if (textureName == "SAND")
+    {
+        return sf::Color::Yellow;
+    }
+
     throw std::runtime_error("No colors found for the given texture name");
 }

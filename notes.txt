@@ -1,6 +1,4 @@
 TODO:
-    - Fix jumping - https://www.youtube.com/watch?v=6WopQvdNRSA
-    - Fix movement, should "jump" to max 5 block height
     - Add dirt, stone, sand
     - Create water system
     - Create 2 biomes: 
