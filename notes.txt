@@ -10,3 +10,4 @@ TODO:
  - Create layers, like BlockLayer, BulletLayer, BackgroundLayer.
  - FIgure out about what i was thinking when i was creating GAME_OBJECT_NAME const. Is it a type name or name of individual object?
  - Think about where should i put BasicBlock and AGameObject classes, shouldn't they be in interface directory? 
+ - Change "global" lib name to "singleton"

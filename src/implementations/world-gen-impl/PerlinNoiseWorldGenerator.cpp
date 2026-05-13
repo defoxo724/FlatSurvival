@@ -60,6 +60,8 @@ std::vector<std::shared_ptr<IGameObject>> PerlinNoiseWorldGenerator::generate()
             float tileW = block->getSize().x;
             float tileH = block->getSize().y;
 
+            std::cout << tileW << std::endl;
+
             float xPos = position.x + i * tileW;
             float yPos = position.y - j * tileH;
 

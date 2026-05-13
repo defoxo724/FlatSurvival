@@ -19,5 +19,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     model
     models
     filesystem-impl
+    camera
+    sfml-camera
 )
 

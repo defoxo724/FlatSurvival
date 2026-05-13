@@ -1,5 +1,7 @@
+#include "CameraSingleton.hpp"
 #include "DeltaTimeSingleton.hpp"
 #include "ExecutablePathSingleton.hpp"
+#include "ICamera.hpp"
 #include "IHealthDisplayer.hpp"
 #include "KeyboardDetectorSingleton.hpp"
 #include "LinuxExecutablePath.hpp"
@@ -18,6 +20,7 @@
 #include "SfmlKeyboardDetector.hpp"
 #include "SfmlMouseDetector.hpp"
 #include "Vec2.hpp"
+#include "implementations/backends/sfml/sfml-camera/SfmlCamera.hpp"
 #include <SFML/Graphics.hpp>
 #include <cstddef>
 #include <cstdio>
@@ -38,12 +41,13 @@ int main()
     MouseDetectorSingleton::getInstance()->setObject(std::make_shared<SfmlMouseDetector>(window));
     DeltaTimeSingleton::getInstance()->setObject(std::make_shared<SfmlDeltaTime>());
     ExecutablePathSingleton::getInstance()->setObject(std::make_shared<LinuxExecutablePath>());
+    CameraSingleton::getInstance()->setObject(std::make_shared<SfmlCamera>(window));
 
     ModelManagerSingleton::getInstance()->setObject(std::make_shared<ModelManagerImpl>());
     auto go = std::make_shared<PlayerGameObjectModel>();
     ModelManagerSingleton::getInstance()->getObject()->addModel(go);
 
-    go->setPosition({300, 300});
+    go->setPosition({0, 300});
 
     sf::Font font{ExecutablePathSingleton::getInstance()->getObject()->get() +
                   "/../../assets/fonts/PixelifySans-Bold.ttf"};
@@ -52,7 +56,7 @@ int main()
 
     std::shared_ptr<IHealthDisplayer> healthDisplayer = std::make_shared<SfmlHealthDisplayer>(font, window);
     // std::shared_ptr<IWorldGenerator> worldGen = std::make_shared<FlatWorldGenerator>(100, 30, Vec2{100, 500});
-    std::shared_ptr<IWorldGenerator> worldGen = std::make_shared<PerlinNoiseWorldGenerator>(500, Vec2{200, 900});
+    std::shared_ptr<IWorldGenerator> worldGen = std::make_shared<PerlinNoiseWorldGenerator>(500, Vec2{0, 2000});
     auto blocks = worldGen->generate();
 
     for (auto &block : blocks)
@@ -73,6 +77,15 @@ int main()
         ModelManagerSingleton::getInstance()->getObject()->update();
         ModelRendererSingleton::getInstance()->getObject()->render(
             ModelManagerSingleton::getInstance()->getObject()->getGameObjects());
+
+        for (auto &el : ModelManagerSingleton::getInstance()->getObject()->getGameObjects())
+        {
+            if (el->getObjectName() == "PLAYER")
+            {
+                CameraSingleton::getInstance()->getObject()->setCenter(el->getPosition());
+                break;
+            }
+        }
 
         // healthDisplayer->displayGameObjectsHealth(
         //     ModelManagerSingleton::getInstance()->getModelManager()->getGameObjects());

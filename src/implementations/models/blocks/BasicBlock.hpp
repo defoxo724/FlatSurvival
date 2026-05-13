@@ -6,8 +6,9 @@
 
 class BasicBlock : public AGameObject
 {
-  protected:
   public:
     /* constant value for EVERY block in the game */
-    const Vec2 PIXEL_SIZE = {4, 4};
+    const Vec2 PIXEL_SIZE = {16, 16};
+
+    BasicBlock();
 };
