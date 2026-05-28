@@ -1,3 +1,5 @@
+#include "AABBHelper.hpp"
+#include "BasicBlock.hpp"
 #include "CameraSingleton.hpp"
 #include "DeltaTimeSingleton.hpp"
 #include "ExecutablePathSingleton.hpp"
@@ -14,6 +16,8 @@
 #include "SFML/Graphics/Font.hpp"
 #include "SFML/Graphics/Text.hpp"
 #include "SFML/System/Vector2.hpp"
+#include "SFML/Window/Keyboard.hpp"
+#include "SFML/Window/Mouse.hpp"
 #include "SfmlColorModelRenderer.hpp"
 #include "SfmlDeltaTime.hpp"
 #include "SfmlHealthDisplayer.hpp"
@@ -84,6 +88,49 @@ int main()
             {
                 CameraSingleton::getInstance()->getObject()->setCenter(el->getPosition());
                 break;
+            }
+        }
+
+        /*
+        TODO: Ten kod jest tymczasowy, zaimplementować system niszczenia plików tutaj i potem wydzielić go do osobnej
+        klasy/przemyśleć co i jak
+        TODO: Zmienić obszar zamiast prostokątów na koła
+         */
+        sf::Vector2i windowPos = sf::Mouse::getPosition(window);
+        sf::Vector2f mousePos = window.mapPixelToCoords(windowPos);
+
+        // Pixels TODO: Zmienić potem na obliczanie tej ilości na dole razy wielkość bloku
+        const int AREA = 50;
+
+        const int MINING_AREA = 200;
+
+        std::shared_ptr<IGameObject> player;
+        for (auto &el : ModelManagerSingleton::getInstance()->getObject()->getGameObjects())
+        {
+            if (el->getObjectName() == "PLAYER")
+            {
+                player = el;
+                break;
+            }
+        }
+        if (AABBHelper::isColliding(player->getPosition(), player->getHitbox(),
+                                    Vec2{mousePos.x - MINING_AREA, mousePos.y - MINING_AREA},
+                                    Vec2{MINING_AREA * 2, MINING_AREA * 2}))
+        {
+
+            if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+            {
+                for (auto &el : ModelManagerSingleton::getInstance()->getObject()->getGameObjects())
+                {
+                    if (AABBHelper::isColliding(Vec2{mousePos.x, mousePos.y}, Vec2{AREA, AREA}, el->getPosition(),
+                                                el->getHitbox()))
+                    {
+                        if (el->getObjectName() != "PLAYER")
+                        {
+                            ModelManagerSingleton::getInstance()->getObject()->removeModel(el);
+                        }
+                    }
+                }
             }
         }
 

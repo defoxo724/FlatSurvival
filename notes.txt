@@ -6,8 +6,14 @@ TODO:
 
 
 
-
- - Create layers, like BlockLayer, BulletLayer, BackgroundLayer.
- - FIgure out about what i was thinking when i was creating GAME_OBJECT_NAME const. Is it a type name or name of individual object?
+ - Create cursor object(it won't be game object, maybe it will be UI)
+ - Create layers UILayer, GameObjectLayer
+ - Create destroying blocks spherically when clicked (don't mind about distance to player and block's hp)
+ - Create inventory and collecting blocks 
+ - Placing blocks
+ - Create Game Interface and then SfmlGame (and setting singletons there)
  - Think about where should i put BasicBlock and AGameObject classes, shouldn't they be in interface directory? 
+ - change GAME_OBJECT_NAME to GAME_OBJECT_TYPE and change method name OR make that "type" and "name" will exist side by side
  - Change "global" lib name to "singleton"
+ - Fix jumping and collision logic and move this code to individual class
+
