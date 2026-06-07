@@ -1,5 +1,6 @@
 #include "AABBHelper.hpp"
 #include "BasicBlock.hpp"
+#include "BlockBreaker.hpp"
 #include "CameraSingleton.hpp"
 #include "DeltaTimeSingleton.hpp"
 #include "ExecutablePathSingleton.hpp"
@@ -13,6 +14,7 @@
 #include "MouseDetectorSingleton.hpp"
 #include "PerlinNoiseWorldGenerator.hpp"
 #include "PlayerGameObjectModel.hpp"
+#include "SFML/Graphics/Color.hpp"
 #include "SFML/Graphics/Font.hpp"
 #include "SFML/Graphics/Text.hpp"
 #include "SFML/System/Vector2.hpp"
@@ -51,6 +53,8 @@ int main()
     auto go = std::make_shared<PlayerGameObjectModel>();
     ModelManagerSingleton::getInstance()->getObject()->addModel(go);
 
+    BlockBreaker blockBreaker;
+
     go->setPosition({0, 300});
 
     sf::Font font{ExecutablePathSingleton::getInstance()->getObject()->get() +
@@ -76,7 +80,7 @@ int main()
                 window.close();
         }
 
-        window.clear();
+        window.clear(sf::Color::Blue);
         window.draw(text);
         ModelManagerSingleton::getInstance()->getObject()->update();
         ModelRendererSingleton::getInstance()->getObject()->render(
@@ -90,52 +94,14 @@ int main()
                 break;
             }
         }
-
-        /*
-        TODO: Ten kod jest tymczasowy, zaimplementować system niszczenia plików tutaj i potem wydzielić go do osobnej
-        klasy/przemyśleć co i jak
-        TODO: Zmienić obszar zamiast prostokątów na koła
-         */
-        sf::Vector2i windowPos = sf::Mouse::getPosition(window);
-        sf::Vector2f mousePos = window.mapPixelToCoords(windowPos);
-
-        // Pixels TODO: Zmienić potem na obliczanie tej ilości na dole razy wielkość bloku
-        const int AREA = 50;
-
-        const int MINING_AREA = 200;
-
-        std::shared_ptr<IGameObject> player;
-        for (auto &el : ModelManagerSingleton::getInstance()->getObject()->getGameObjects())
-        {
-            if (el->getObjectName() == "PLAYER")
-            {
-                player = el;
-                break;
-            }
-        }
-        if (AABBHelper::isColliding(player->getPosition(), player->getHitbox(),
-                                    Vec2{mousePos.x - MINING_AREA, mousePos.y - MINING_AREA},
-                                    Vec2{MINING_AREA * 2, MINING_AREA * 2}))
-        {
-
-            if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
-            {
-                for (auto &el : ModelManagerSingleton::getInstance()->getObject()->getGameObjects())
-                {
-                    if (AABBHelper::isColliding(Vec2{mousePos.x, mousePos.y}, Vec2{AREA, AREA}, el->getPosition(),
-                                                el->getHitbox()))
-                    {
-                        if (el->getObjectName() != "PLAYER")
-                        {
-                            ModelManagerSingleton::getInstance()->getObject()->removeModel(el);
-                        }
-                    }
-                }
-            }
-        }
-
+        blockBreaker.breakBlocks(window);
         // healthDisplayer->displayGameObjectsHealth(
         //     ModelManagerSingleton::getInstance()->getModelManager()->getGameObjects());
+
+        // Update title
+        std::string title =
+            "FlatSurvival FPS: " + std::to_string(1 / DeltaTimeSingleton::getInstance()->getObject()->getDeltaTime());
+        window.setTitle(title);
         window.display();
         DeltaTimeSingleton::getInstance()->getObject()->measure();
     }

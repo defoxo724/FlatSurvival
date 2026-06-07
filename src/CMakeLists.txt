@@ -4,6 +4,8 @@ add_subdirectory(interfaces)
 add_subdirectory(utils)
 add_subdirectory(global)
 
+add_subdirectory(logic_tmp)
+
 
 
 add_executable(${PROJECT_NAME} "main.cpp")
@@ -21,5 +23,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     filesystem-impl
     camera
     sfml-camera
+    logic_tmp
 )
 
