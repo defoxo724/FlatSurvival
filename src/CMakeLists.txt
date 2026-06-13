@@ -1,28 +1,7 @@
-add_subdirectory(implementations)
-add_subdirectory(interfaces)
-
-add_subdirectory(utils)
-add_subdirectory(global)
-
-add_subdirectory(logic_tmp)
+add_executable(${PROJECT_NAME} main.cpp Blocks.cpp)
 
 
-
-add_executable(${PROJECT_NAME} "main.cpp")
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    SFML::Graphics  
-    model-manager-impl 
-    utils 
-    sfml-model-renderer 
-    world-gen-impl 
-    global 
-    sfml-mouse 
-    sfml-health-displayer
-    model
-    models
-    filesystem-impl
-    camera
-    sfml-camera
-    logic_tmp
+target_include_directories(${PROJECT_NAME} PUBLIC .)
+target_link_libraries(${PROJECT_NAME} PUBLIC 
+    SFML::Graphics      
 )
-
