@@ -1,9 +1,10 @@
 #pragma once
 
+#include "SFML/Graphics/Color.hpp"
 #include <string>
 
 class Block
 {
   public:
-    std::string textureName;
+    sf::Color renderedColor;
 };

@@ -6,5 +6,5 @@
 class Blocks
 {
   public:
-    static const Block AIR, GRASS, SAND;
+    static const Block AIR, DIRT, GRASS, SAND, BEDROCK, STONE;
 };
