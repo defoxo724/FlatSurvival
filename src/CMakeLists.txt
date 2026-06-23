@@ -1,4 +1,4 @@
-add_executable(${PROJECT_NAME} main.cpp Blocks.cpp)
+add_executable(${PROJECT_NAME} main.cpp Blocks.cpp Biomes.cpp)
 
 
 target_include_directories(${PROJECT_NAME} PUBLIC . ${perlinnoise_SOURCE_DIR})

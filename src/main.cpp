@@ -1,86 +1,47 @@
 #include "Blocks.hpp"
+#include "SFML/Graphics/Color.hpp"
 #include "SFML/Graphics/RectangleShape.hpp"
 #include "SFML/Graphics/RenderWindow.hpp"
+#include "SFML/System/Vector2.hpp"
+#include "SFML/Window/Mouse.hpp"
+#include "WorldGenerator.hpp"
+#include "global.hpp"
 #include <PerlinNoise.hpp>
 #include <array>
 #include <cstdint>
 #include <sys/types.h>
-#include <vector>
-
-const std::uint32_t WORLD_HEIGHT = 20;
-const std::uint32_t WORLD_WIDTH = 200;
-
-const std::uint8_t BLOCK_SIZE_IN_PIXELS = 32;
-
-/*
-    Array 2d bloków o rozmiarach świata.
-
-    Użycie:
-        blockArray.at(4).at(10) - X: 4, Y: 10
-
-*/
-using WorldSizeBlockArray = std::array<std::array<Block, WORLD_HEIGHT>, WORLD_WIDTH>;
-WorldSizeBlockArray blockArray;
-sf::RenderWindow window(sf::VideoMode({1920, 1080}), "SFML works!");
-
-void generateWorld()
-{
-    const siv::PerlinNoise terrainNoise{12345u};
-    const siv::PerlinNoise bedrockNoise{54321u};
-
-    for (std::uint32_t x = 0; x < WORLD_WIDTH; x++)
-    {
-        // Teren mniej więcej w połowie wysokości świata
-        double noise = terrainNoise.octave1D_01(x * 0.08, 4);
-
-        int baseHeight = WORLD_HEIGHT / 2;
-        int terrainHeight = baseHeight + static_cast<int>((noise - 0.5) * 6);
-
-        // Ograniczenie, żeby teren nie wyszedł poza świat
-        terrainHeight = std::clamp(terrainHeight, 2, static_cast<int>(WORLD_HEIGHT - 4));
-
-        // Ilość warstw dirta pod trawą: 2-5
-        int dirtLayers = 2 + static_cast<int>(noise * 4);
-
-        // Bedrock: zawsze ostatnia warstwa, czasem 1 kratka wyżej
-        double bedrockValue = bedrockNoise.octave1D_01(x * 0.4, 2);
-        int bedrockHeight = bedrockValue > 0.55 ? 2 : 1;
-
-        for (std::uint32_t y = 0; y < WORLD_HEIGHT; y++)
-        {
-            if (y < terrainHeight)
-            {
-                blockArray.at(x).at(y) = Blocks::AIR;
-            }
-            else if (y == terrainHeight)
-            {
-                blockArray.at(x).at(y) = Blocks::GRASS;
-            }
-            else if (y <= terrainHeight + dirtLayers)
-            {
-                blockArray.at(x).at(y) = Blocks::DIRT;
-            }
-            else if (y >= WORLD_HEIGHT - bedrockHeight)
-            {
-                blockArray.at(x).at(y) = Blocks::BEDROCK;
-            }
-            else
-            {
-                blockArray.at(x).at(y) = Blocks::STONE;
-            }
-        }
-    }
-}
 
 int main()
 {
-    generateWorld();
+    WorldGenerator generator;
+    generator.generateWorld2();
+    srand(time(NULL));
+    sf::RectangleShape cursor{sf::Vector2f(BLOCK_SIZE_IN_PIXELS, BLOCK_SIZE_IN_PIXELS)};
+    cursor.setFillColor(sf::Color(0, 0, 0, 0));
+    cursor.setOutlineColor(sf::Color::Red);
+    cursor.setOutlineThickness(1);
+
+    window.setFramerateLimit(60);
+    // generateWorld();
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
+        }
+
+        cursor.setPosition(
+            sf::Vector2f((sf::Mouse::getPosition(window).x / BLOCK_SIZE_IN_PIXELS) * BLOCK_SIZE_IN_PIXELS,
+                         (sf::Mouse::getPosition(window).y / BLOCK_SIZE_IN_PIXELS) * BLOCK_SIZE_IN_PIXELS));
+
+        /* Destroying blocks*/
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+        {
+            std::uint32_t x = (sf::Mouse::getPosition(window).x / BLOCK_SIZE_IN_PIXELS);
+            std::uint32_t y = (sf::Mouse::getPosition(window).y / BLOCK_SIZE_IN_PIXELS);
+
+            blockArray.at(x).at(y) = Blocks::AIR;
         }
 
         // Block rendering
@@ -95,7 +56,9 @@ int main()
                 window.draw(blockDrawer);
             }
         }
+        window.draw(cursor);
 
         window.display();
+        window.clear();
     }
 }
